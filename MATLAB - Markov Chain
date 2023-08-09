@@ -1,0 +1,43 @@
+d = 0.85; % Damping factor
+
+% Solving for steady_state vector based on the coefficient matrix A and vector on the right-hand-side b
+A = [1 0 0 0 0 -d/6; 0 1 0 0 0 -d/6; 0 0 1 0 0 -d/6; 0 0 0 1 0 -d/6; -d/2 -d -d 0 1 -d/6; -d/2 0 0 -d -d 1-d/6; 1 1 1 1 1 1];        
+b = [(1-d)/6; (1-d)/6; (1-d)/6; (1-d)/6; (1-d)/6; (1-d)/6; 1];           
+steady_state = A\b;  % (This variable is the steady-state solution of [r_A; r_B; r_C; r_D; r_E; r_F]
+
+P = [(1-d)/6 (1-d)/6 (1-d)/6 (1-d)/6 (1-d)/6 1/6;
+    (1-d)/6 (1-d)/6 (1-d)/6 (1-d)/6 (1-d)/6 1/6;
+    (1-d)/6 (1-d)/6 (1-d)/6 (1-d)/6 (1-d)/6 1/6;
+    (1-d)/6 (1-d)/6 (1-d)/6 (1-d)/6 (1-d)/6 1/6;
+    (d/3)+(1/6) (1+5*d)/6 (1+5*d)/6 (1-d)/6 (1-d)/6 1/6;
+    (d/3)+(1/6) (1-d)/6 (1-d)/6 (1+5*d)/6 (1+5*d)/6 1/6];        
+
+m = 20;         % Iterations
+R = zeros(6,m); % Create an matrix R for storing the ranks in each iteration
+R(:,1) = 1/6;   % Initial vector with evenly distribution at all six web pages
+    
+for i = 2:m
+    R(:,i) = P*R(:,i-1); 
+end
+
+% Rank plot
+x = 1:m;
+r_A = R(1,:);
+% The expression for r_E and r_F
+r_E = R(5,:);
+r_F = R(6,:);
+figure
+plot(x,r_A,'o-',x,r_E,'o-',x,r_F,'o-')
+xlabel('Iteration')
+ylabel('Rank')
+legend('Web page A, B, C or D','Web page E', 'Web page F')
+
+% Error plot
+r_A = (R(1,:)-steady_state(1))/steady_state(1)*100;
+r_E = (R(5,:)-steady_state(5))/steady_state(5)*100;
+r_F = (R(6,:)-steady_state(6))/steady_state(6)*100;
+figure
+plot(x,r_A,'o-',x,r_E,'o-',x,r_F,'o-')
+xlabel('Iteration')
+ylabel('Percentage error (%)')
+legend('Web page A, B, C or D','Web page E', 'Web page F')
